@@ -1,23 +1,12 @@
-// TODO: implement service worker so that users can use the app offline. The SW
-// will need to cache static assets to display the app offline. Additionally,
-// the SW should cache transaction data, using the cached data as a fallback
-// when the app is used offline. HINT: You should use two caches. One for the
-// static assets such ass html, css, js, images, etc; and another cache for
-// the dynamic data from requests to routes beginning with "/api".
 const FILES_TO_CACHE = [
   "/",
+  "/db.js",
+  "/index.js",
   "/index.html",
-  "/favicon.ico",
-  "/app.js",
-  "/manifest.webmanifest",
-  "/assets/images/icons/icon-72x72.png",
-  "/assets/images/icons/icon-96x96.png",
-  "/assets/images/icons/icon-128x128.png",
-  "/assets/images/icons/icon-144x144.png",
-  "/assets/images/icons/icon-152x152.png",
-  "/assets/images/icons/icon-192x192.png",
-  "/assets/images/icons/icon-384x384.png",
-  "/assets/images/icons/icon-512x512.png",
+  "/styles.css",
+  "/manifest.json",
+  "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png",
 ];
 
 const CACHE_NAME = "static-cache-v2";
@@ -27,7 +16,6 @@ const DATA_CACHE_NAME = "data-cache-v1";
 self.addEventListener("install", (evt) => {
   evt.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("Your files were pre-cached successfully!");
       return cache.addAll(FILES_TO_CACHE);
     })
   );
@@ -41,7 +29,6 @@ self.addEventListener("activate", (evt) => {
       return Promise.all(
         keyList.map((key) => {
           if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
-            console.log("Removing old cache data", key);
             return caches.delete(key);
           }
         })
@@ -55,7 +42,7 @@ self.addEventListener("activate", (evt) => {
 // fetch
 self.addEventListener("fetch", (evt) => {
   // cache successful requests to the API
-  if (evt.request.url.includes("/")) {
+  if (evt.request.url.includes("/api")) {
     evt.respondWith(
       caches
         .open(DATA_CACHE_NAME)
